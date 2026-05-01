@@ -1,0 +1,15 @@
+[project]
+name = "mednerds"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.10.9",
+    "negspacy>=1.1.0",
+    "numpy>=2.4.4",
+    "pandas>=3.0.2",
+    "spacy>=3.8.13",
+    "streamlit>=1.56.0",
+    "transformers>=5.6.2",
+]
