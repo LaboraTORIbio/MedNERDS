@@ -1,8 +1,13 @@
 # MedNERDS
 Medical Named Entity Recognition for Data Structuring
 
-## For localhost execution
+## With uv
+```
+uv sync
+uv run streamlit run app.py
+```
 
+## For localhost execution (no uv)
 Install Streamlit:
 ```
 pip install streamlit
