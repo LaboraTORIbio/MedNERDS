@@ -7,12 +7,12 @@ import sys
 import os
 # 👇 importa tu función del notebook o módulo
 sys.path.append(os.path.dirname(__file__))
-from bio.prueba_modelo import ner_prediction, highlight_entities
+from bio.ner_prediction import ner_prediction, highlight_entities
 
 
 st.set_page_config(page_title="MedNERDS", layout="wide")
 
-st.title("🧬 MedNERDs App")
+st.title("🧬 MedNERDS App")
 st.markdown("Extracción de entidades médicas")
 
 # ==========================
@@ -33,12 +33,12 @@ run = st.button("Analizar")
 
 if run and text.strip():
     
-    result = ner_prediction(text, compute="gpu")
+    pred_df, final_df = ner_prediction(text)
 
     # convertir DataFrame → lista de dicts adaptados
     entities = []
 
-    for _, row in result.iterrows():
+    for _, row in pred_df.iterrows():
         entities.append({
             "type": row["entity_group"],
             "value": row["value"],
@@ -101,7 +101,7 @@ if run and text.strip():
 
     st.markdown("---")
     st.subheader("🧾 Output estructurado")
-    st.text_area("Resultados", value=str(result.to_dict(orient="records")), height=200)
+    st.dataframe(final_df, use_container_width=True, hide_index=True)
 
 # ==========================
 # FOOTER
