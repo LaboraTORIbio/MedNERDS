@@ -1,15 +1,18 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
+import spacy
+from spacy import displacy
 import sys
 import os
 # 👇 importa tu función del notebook o módulo
 sys.path.append(os.path.dirname(__file__))
-from bio.prueba_modelo import extract_ner 
+from bio.prueba_modelo import ner_prediction, highlight_entities
+
 
 st.set_page_config(page_title="MedNERDS", layout="wide")
 
-st.title("🧬 Biomedical MedNERDs App")
+st.title("🧬 MedNERDs App")
 st.markdown("Extracción de entidades médicas")
 
 # ==========================
@@ -29,18 +32,43 @@ run = st.button("Analizar")
 # ==========================
 
 if run and text.strip():
+    
+    result = ner_prediction(text, compute="gpu")
 
-    result = extract_ner(text)
+    # convertir DataFrame → lista de dicts adaptados
+    entities = []
 
-    entities = result["entities"]
-    grouped = result["grouped"]
-    counts = result["counts"]
+    for _, row in result.iterrows():
+        entities.append({
+            "type": row["entity_group"],
+            "value": row["value"],
+            "start": row["start"],
+            "end": row["end"],
+            "score": float(row["score"]),
+        })
+
+    from collections import defaultdict
+
+    grouped = defaultdict(list)
+
+    for ent in entities:
+        grouped[ent["type"]].append(ent["value"])
+        counts = {k: len(v) for k, v in grouped.items()}
+
+
+    # ==========================
+    # Texto con Highlights
+    # ==========================
+    st.subheader("📄 Texto introducido")
+    html = highlight_entities(text, entities)
+    st.markdown(html, unsafe_allow_html=True) 
 
     col1, col2 = st.columns(2)
 
     # ==========================
     # DETALLE ENTIDADES
     # ==========================
+
 
     with col1:
         st.subheader("🔎 Entidades detectadas")
@@ -73,7 +101,7 @@ if run and text.strip():
 
     st.markdown("---")
     st.subheader("🧾 Output estructurado")
-    st.json(result)
+    st.text_area("Resultados", value=str(result.to_dict(orient="records")), height=200)
 
 # ==========================
 # FOOTER
