@@ -32,7 +32,7 @@ def detect_negations(corpus, df):
             int(row["start"]),
             int(row["end"]),
             label=row["entity_group"],
-            alignment_mode="expand"
+            alignment_mode="expand",
         )
         for _, row in df.iterrows()
     ]
@@ -61,13 +61,7 @@ def extract_age(value):
 
 
 def aggregate_entities(df):
-    result = {
-        "Age": None,
-        "Sex": None,
-        "History": [],
-        "Symptoms": [],
-        "Medication": []
-    }
+    result = {"Age": None, "Sex": None, "History": [], "Symptoms": [], "Medication": []}
 
     if df.empty:
         return pd.DataFrame([result])
@@ -117,25 +111,30 @@ def ner_prediction(corpus):
 
     pred_df = pd.DataFrame(pred)
 
-    pred_df['negated'] = detect_negations(corpus, pred_df)
-    
+    pred_df["negated"] = detect_negations(corpus, pred_df)
+
     actual_values_list = []
     for _, pred_df_row in pred_df.iterrows():
-        actual_word = corpus[pred_df_row['start']: pred_df_row['end']]
+        actual_word = corpus[pred_df_row["start"] : pred_df_row["end"]]
         actual_values_list.append(actual_word)
 
-    pred_df['value'] = actual_values_list
-    
+    pred_df["value"] = actual_values_list
+
     if len(pred_df) != 0:
-        pred_df = pred_df[['entity_group', 'value', 'word', 'start', 'end', 'score', 'negated']]
-        pred_df['entity_group'] = pred_df['entity_group'].replace({"Sign_symptom": "Symptoms"})
+        pred_df = pred_df[
+            ["entity_group", "value", "word", "start", "end", "score", "negated"]
+        ]
+        pred_df["entity_group"] = pred_df["entity_group"].replace(
+            {"Sign_symptom": "Symptoms"}
+        )
         pred_df = pred_df.drop_duplicates(
-            subset=['entity_group', 'value', 'negated'],
-            keep='first'
+            subset=["entity_group", "value", "negated"], keep="first"
         ).reset_index(drop=True)
-        
+
     final_df = aggregate_entities(pred_df)
-    final_df = final_df.reindex(columns=["Age", "Sex", "History", "Symptoms", "Medication"])
+    final_df = final_df.reindex(
+        columns=["Age", "Sex", "History", "Symptoms", "Medication"]
+    )
 
     return pred_df, final_df
 
@@ -148,7 +147,7 @@ def highlight_entities(text, entities):
         "Medication": "#6eade0",
         "Symptoms": "#f57969",
         "History": "#63e6be",
-        "Default": "#c769ab"
+        "Default": "#c769ab",
     }
 
     html_parts = []
@@ -165,7 +164,7 @@ def highlight_entities(text, entities):
 
         html_parts.append(
             f'<span style="background-color:{color};padding:2px 4px;border-radius:4px;font-weight:bold;">'
-            f'{text[start:end]} ({label})</span>'
+            f"{text[start:end]} ({label})</span>"
         )
 
         last_idx = end

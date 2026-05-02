@@ -32,20 +32,23 @@ def save_record(patient_id, final_df):
 
     row = final_df.iloc[0]
 
-    c.execute("""
+    c.execute(
+        """
         INSERT INTO records (
             patient_id, age, sex, history, symptoms, medication, created_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
-        patient_id,
-        int(row["Age"]),
-        row["Sex"],
-        json.dumps(row["History"]),
-        json.dumps(row["Symptoms"]),
-        json.dumps(row["Medication"]),
-        datetime.now()
-    ))
+    """,
+        (
+            patient_id,
+            int(row["Age"]),
+            row["Sex"],
+            json.dumps(row["History"]),
+            json.dumps(row["Symptoms"]),
+            json.dumps(row["Medication"]),
+            datetime.now(),
+        ),
+    )
 
     conn.commit()
     conn.close()
@@ -57,12 +60,15 @@ def get_records_by_patient(patient_id):
 
     try:
         c = conn.cursor()
-        c.execute("""
+        c.execute(
+            """
             SELECT
                 patient_id, age, sex, history, symptoms, medication, created_at
             FROM records
             WHERE patient_id = ?
-        """, (patient_id,))
+        """,
+            (patient_id,),
+        )
 
         records = c.fetchall()
         return [dict(record) for record in records]
