@@ -151,7 +151,7 @@ def highlight_entities(text, entities):
         "Default": "#c769ab"
     }
 
-    html = ""
+    html_parts = []
     last_idx = 0
 
     for ent in entities:
@@ -161,26 +161,14 @@ def highlight_entities(text, entities):
 
         color = colors.get(label, colors["Default"])
 
-        # texto normal antes de entidad
-        html += text[last_idx:start]
+        html_parts.append(text[last_idx:start])
 
-        # entidad coloreada
-        html += f"""
-        <span style="
-            background-color:{color};
-            padding:2px 4px;
-            border-radius:4px;
-            color:black;
-            font-weight:bold;
-        ">
-            {text[start:end]} ({label})
-        </span>
-        """
+        html_parts.append(
+            f'<span style="background-color:{color};padding:2px 4px;border-radius:4px;font-weight:bold;">'
+            f'{text[start:end]} ({label})</span>'
+        )
 
         last_idx = end
 
-    # resto del texto
-    html += text[last_idx:]
-
-    return html
-
+    html_parts.append(text[last_idx:])
+    return "".join(html_parts)
