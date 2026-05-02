@@ -10,7 +10,6 @@ init_db()
 st.set_page_config(page_title="MedNERDS", layout="wide")
 
 st.title("🧬 MedNERDS App")
-st.markdown("Extracción de entidades médicas")
 
 tab1, tab2 = st.tabs(["📝 Insert", "🔍 Find"])
 
@@ -19,15 +18,15 @@ with tab1:
         # ==========================
         # INPUT UI
         # ==========================
-    patient_id = st.text_input("Introduce ID del paciente:", placeholder="Ej: 12345")
+    patient_id = st.text_input("Introduce patient ID:", placeholder="Ej: 12345")
 
     text = st.text_area(
-            "Introduce texto clínico:",
+            "Introduce clinical notes:",
             height=180,
             placeholder="Ej: Patient diagnosed with diabetes and prescribed ibuprofen..."
         )
 
-    run = st.button("Analizar")
+    run = st.button("Analize")
 
     # ==========================
     # PROCESS
@@ -59,7 +58,7 @@ with tab1:
         # ==========================
         # Texto con Highlights
         # ==========================
-        st.subheader("📄 Texto introducido")
+        st.subheader("📄 Highlighted Entities")
         html = highlight_entities(text, entities)
         st.markdown(html, unsafe_allow_html=True) 
 
@@ -71,36 +70,36 @@ with tab1:
 
 
         with col1:
-            st.subheader("🔎 Entidades detectadas")
+            st.subheader("🔎 Recognized Entities")
 
             if entities:
                 df = pd.DataFrame(entities)
                 st.dataframe(df, use_container_width=True, hide_index=True)
             else:
-                st.info("No se detectaron entidades con ese umbral.")
+                st.info("No entities were detected at that threshold.")
 
         # ==========================
         # AGRUPACIÓN
         # ==========================
 
         with col2:
-            st.subheader("📊 Agrupación por tipo")
+            st.subheader("📊 Grouped by type")
 
             if grouped:
                 df_grouped = pd.DataFrame(
                     [(k, v, counts[k]) for k, v in grouped.items()],
-                    columns=["Tipo", "Valores", "Cantidad"]
+                    columns=["Type", "Values", "Count"]
                 )
                 st.dataframe(df_grouped, use_container_width=True, hide_index=True)
             else:
-                st.info("Sin datos agrupados.")
+                st.info("Ungrouped data.")
 
         # ==========================
         # JSON RAW (debug útil)
         # ==========================
 
         st.markdown("---")
-        st.subheader("🧾 Output estructurado")
+        st.subheader("🧾 Structured Output")
         finalOutput = final_df.copy()
         finalOutput.insert(0, "Patient Id", patient_id)
         st.dataframe(finalOutput, use_container_width=True, hide_index=True)
@@ -108,9 +107,9 @@ with tab1:
         save_record(patient_id, final_df)
 
     with tab2:
-        st.subheader("🔍 Buscar por ID de paciente")
-        search_id = st.text_input("Introduce ID del paciente para buscar:", placeholder="Ej: 12345")
-        search_btn = st.button("Buscar")
+        st.subheader("🔍 Search by patient ID")
+        search_id = st.text_input("Enter patient ID to search:", placeholder="Ej: 12345")
+        search_btn = st.button("Search")
 
         if search_btn and search_id.strip():
             records = get_records_by_patient(search_id)
@@ -128,7 +127,7 @@ with tab1:
                 
                 st.dataframe(df, use_container_width=True, hide_index=True)
             else:
-                st.warning("No se encontró ningún registro con ese ID.")
+                st.warning("No records found with that ID.")
 
 # ==========================
 # FOOTER
