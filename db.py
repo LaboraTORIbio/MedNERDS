@@ -12,7 +12,7 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            patient_id INTEGER,
+            patient_id TEXT,
             age INTEGER,
             sex TEXT,
             history TEXT,
@@ -25,11 +25,12 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def save_record(patient_id, final_df):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    row = final_df.iloc[0]  # solo hay una fila
+    row = final_df.iloc[0]
 
     c.execute("""
         INSERT INTO records (
@@ -38,7 +39,7 @@ def save_record(patient_id, final_df):
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         patient_id,
-        row["Age"],
+        int(row["Age"]),
         row["Sex"],
         json.dumps(row["History"]),
         json.dumps(row["Symptoms"]),
@@ -48,3 +49,23 @@ def save_record(patient_id, final_df):
 
     conn.commit()
     conn.close()
+
+
+def get_records_by_patient(patient_id):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT
+                patient_id, age, sex, history, symptoms, medication, created_at
+            FROM records
+            WHERE patient_id = ?
+        """, (patient_id,))
+
+        records = c.fetchall()
+        return [dict(record) for record in records]
+
+    finally:
+        conn.close()

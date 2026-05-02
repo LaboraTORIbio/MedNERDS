@@ -1,14 +1,8 @@
 import streamlit as st
 import pandas as pd
 from collections import defaultdict
-import spacy
-from spacy import displacy
-import sys
-import os
 
-sys.path.append(os.path.dirname(__file__))
 from bio.ner_prediction import ner_prediction, highlight_entities
-sys.path.append(os.path.dirname(__file__))
 from db import init_db, save_record, get_records_by_patient
 
 init_db()
@@ -54,8 +48,6 @@ with tab1:
                 "end": row["end"],
                 "score": float(row["score"]),
             })
-
-        from collections import defaultdict
 
         grouped = defaultdict(list)
 
@@ -123,10 +115,16 @@ with tab1:
         if search_btn and search_id.strip():
             records = get_records_by_patient(search_id)
             if records:
-                df = pd.DataFrame(records, columns=[
-                    "Patient ID", "Age", "Sex",
-                    "History", "Symptoms", "Medication", "Date"
-                    ])
+                df = pd.DataFrame(records)
+                df = df.rename(columns={
+                    "patient_id": "Patient ID",
+                    "age": "Age",
+                    "sex": "Sex",
+                    "history": "History",
+                    "symptoms": "Symptoms",
+                    "medication": "Medication",
+                    "created_at": "Date"
+                })
                 
                 st.dataframe(df, use_container_width=True, hide_index=True)
             else:
